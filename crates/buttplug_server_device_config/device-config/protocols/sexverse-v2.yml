@@ -54,7 +54,7 @@ configurations:
   name: Duopeak Saphette
   features:
   - description: Wearer Vibrator
-    id: 968f7306-6997-4b76-a40f-acbb431d9582
+    id: 5bd4f48b-87c9-4e87-9244-9c812bd8595b
     output:
       oscillate:
         value:
@@ -62,7 +62,7 @@ configurations:
         - 20
     index: 0
   - description: Receiver Vibrator
-    id: '018009d0-b5bf-4f97-a13d-909d0e74fabc'
+    id: 'c40a3efb-4613-48e2-91b8-e9f8bce5b135'
     output:
       vibrate:
         value:
@@ -70,14 +70,14 @@ configurations:
         - 20
     index: 1
   - description: Wearer Clitoral Vibrators
-    id: '018009d0-b5bf-4f97-a13d-909d0e74fabc'
+    id: 'c8401d8e-a1ae-4972-a293-9c7d5224c2a1'
     output:
       vibrate:
         value:
         - 0
         - 20
     index: 2
-  id: 0e1f9fe7-22d9-4afb-9fe5-192b8e5508c3
+  id: 5eb158ef-a46f-4d9f-8b1c-c00a0e4d0c91
 communication:
 - btle:
     names:

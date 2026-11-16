@@ -639,7 +639,7 @@ configurations:
         - 7
     index: 5
   - description: Heater
-    id: de6a3c95-b7b8-427e-9775-7c9fd612631f
+    id: 9767651b-a5e6-4767-b9e1-912f18a71bdc
     output:
       temperature:
         value:

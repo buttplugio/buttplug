@@ -95,7 +95,7 @@ configurations:
   - identifier:
       - HBP-JXT001
     name: Honey Play Box Puff
-    id: 0a9c43fb-2d58-4af9-aef2-60f48c6e7707
+    id: c5d67364-0030-4112-b522-68bdfcc16572
   - identifier:
       - JXT002
     name: Honey Play Box Vibrosa
@@ -158,14 +158,14 @@ configurations:
       - HPB-393-1
     name: Honey Play Box Oly 2
     features:
-      - id: 7b6fdb3a-578e-4af8-aa5f-fa6b0cc38b46
+      - id: de8ceff0-6b75-4a5a-b6f0-20a7020e454e
         output:
           vibrate:
             value:
               - 0
               - 100
         index: 0
-      - id: 76647712-0a86-4391-9812-c5a2c4717264
+      - id: 916b4771-24c6-4d2e-9d58-4433484a6abc
         output:
           vibrate:
             value:
@@ -173,7 +173,7 @@ configurations:
               - 100
         index: 1
       - description: Battery Level
-        id: 372549a4-2665-4bc8-9aac-f5f993f96208
+        id: 327718a9-5a7e-4222-8c92-e32331e0c364
         input:
           battery:
             value:
@@ -182,7 +182,7 @@ configurations:
             command:
               - Read
         index: 2
-    id: aa161c35-4074-441d-8277-d56cf56f3610
+    id: cbc1cae7-516b-44a6-95fc-383d290c8e04
   - identifier:
       - HPB-399
     name: Honey Play Box Cyrus

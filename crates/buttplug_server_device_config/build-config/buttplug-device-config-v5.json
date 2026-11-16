@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 82
+    "minor": 83
   },
   "protocols": {
     "activejoy": {
@@ -858,7 +858,7 @@
               }
             }
           ],
-          "id": "ee9f0605-415e-4b07-8deb-c7252eff7053",
+          "id": "97cb6eaa-9494-49bb-ad38-894538df7077",
           "identifier": [
             "47L127000"
           ],
@@ -5236,7 +5236,7 @@
           "name": "Honey Play Box Anello"
         },
         {
-          "id": "0a9c43fb-2d58-4af9-aef2-60f48c6e7707",
+          "id": "c5d67364-0030-4112-b522-68bdfcc16572",
           "identifier": [
             "HBP-JXT001"
           ],
@@ -5347,7 +5347,7 @@
         {
           "features": [
             {
-              "id": "7b6fdb3a-578e-4af8-aa5f-fa6b0cc38b46",
+              "id": "de8ceff0-6b75-4a5a-b6f0-20a7020e454e",
               "index": 0,
               "output": {
                 "vibrate": {
@@ -5359,7 +5359,7 @@
               }
             },
             {
-              "id": "76647712-0a86-4391-9812-c5a2c4717264",
+              "id": "916b4771-24c6-4d2e-9d58-4433484a6abc",
               "index": 1,
               "output": {
                 "vibrate": {
@@ -5372,7 +5372,7 @@
             },
             {
               "description": "Battery Level",
-              "id": "372549a4-2665-4bc8-9aac-f5f993f96208",
+              "id": "327718a9-5a7e-4222-8c92-e32331e0c364",
               "index": 2,
               "input": {
                 "battery": {
@@ -5389,7 +5389,7 @@
               }
             }
           ],
-          "id": "aa161c35-4074-441d-8277-d56cf56f3610",
+          "id": "cbc1cae7-516b-44a6-95fc-383d290c8e04",
           "identifier": [
             "HPB-393-1"
           ],
@@ -7574,7 +7574,7 @@
             },
             {
               "description": "Heater",
-              "id": "de6a3c95-b7b8-427e-9775-7c9fd612631f",
+              "id": "9767651b-a5e6-4767-b9e1-912f18a71bdc",
               "index": 6,
               "output": {
                 "temperature": {
@@ -21969,7 +21969,7 @@
           "features": [
             {
               "description": "Wearer Vibrator",
-              "id": "968f7306-6997-4b76-a40f-acbb431d9582",
+              "id": "5bd4f48b-87c9-4e87-9244-9c812bd8595b",
               "index": 0,
               "output": {
                 "oscillate": {
@@ -21982,7 +21982,7 @@
             },
             {
               "description": "Receiver Vibrator",
-              "id": "018009d0-b5bf-4f97-a13d-909d0e74fabc",
+              "id": "c40a3efb-4613-48e2-91b8-e9f8bce5b135",
               "index": 1,
               "output": {
                 "vibrate": {
@@ -21995,7 +21995,7 @@
             },
             {
               "description": "Wearer Clitoral Vibrators",
-              "id": "018009d0-b5bf-4f97-a13d-909d0e74fabc",
+              "id": "c8401d8e-a1ae-4972-a293-9c7d5224c2a1",
               "index": 2,
               "output": {
                 "vibrate": {
@@ -22007,7 +22007,7 @@
               }
             }
           ],
-          "id": "0e1f9fe7-22d9-4afb-9fe5-192b8e5508c3",
+          "id": "5eb158ef-a46f-4d9f-8b1c-c00a0e4d0c91",
           "identifier": [
             "NBQ-B619RX"
           ],
@@ -24343,7 +24343,7 @@
       "defaults": {
         "features": [
           {
-            "id": "ccbbda59-cf58-477e-b1b2-e0897c4bb0ce",
+            "id": "54b93d11-889f-48a6-96c1-ce026e49cee0",
             "index": 0,
             "output": {
               "hw_position_with_duration": {
@@ -24920,7 +24920,7 @@
             }
           }
         ],
-        "id": "45648a20-cb18-43a0-9d6c-8bc4ed63ef63",
+        "id": "e3caf53d-f0e5-4fea-b494-70725029a694",
         "name": "Umove Device"
       }
     },
@@ -25104,7 +25104,7 @@
         {
           "features": [
             {
-              "id": "343a8e18-b76c-4482-b048-32d762bf87c9",
+              "id": "8db78df3-92c1-4e59-b599-a399a6493bd5",
               "index": 0,
               "output": {
                 "vibrate": {
@@ -25125,7 +25125,7 @@
         {
           "features": [
             {
-              "id": "343a8e18-b76c-4482-b048-32d762bf87c9",
+              "id": "9281fae8-f8e4-4b9f-b452-b01e67c6e3a2",
               "index": 0,
               "output": {
                 "vibrate": {
@@ -25168,7 +25168,7 @@
       "defaults": {
         "features": [
           {
-            "id": "343a8e18-b76c-4482-b048-32d762bf87c9",
+            "id": "49c667c8-b301-4643-91fd-fee957615121",
             "index": 0,
             "output": {
               "vibrate": {
@@ -25180,7 +25180,7 @@
             }
           },
           {
-            "id": "d92a031e-bd0d-4815-a0bd-6c59566dcce2",
+            "id": "b0558fcc-2789-4641-ba23-eb86d8c0fb17",
             "index": 1,
             "output": {
               "vibrate": {
@@ -25192,7 +25192,7 @@
             }
           }
         ],
-        "id": "a44eef0e-b412-44d0-9545-a4b7b0298514",
+        "id": "797b5b8d-685a-4b92-b816-5979e83c4f71",
         "name": "Vibio Device"
       }
     },

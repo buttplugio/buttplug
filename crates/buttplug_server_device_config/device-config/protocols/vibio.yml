@@ -2,27 +2,27 @@
 defaults:
   name: Vibio Device
   features:
-  - id: 343a8e18-b76c-4482-b048-32d762bf87c9
+  - id: 49c667c8-b301-4643-91fd-fee957615121
     output:
       vibrate:
         value:
         - 0
         - 99
     index: 0
-  - id: d92a031e-bd0d-4815-a0bd-6c59566dcce2
+  - id: b0558fcc-2789-4641-ba23-eb86d8c0fb17
     output:
       vibrate:
         value:
         - 0
         - 99
     index: 1
-  id: a44eef0e-b412-44d0-9545-a4b7b0298514
+  id: 797b5b8d-685a-4b92-b816-5979e83c4f71
 configurations:
 - identifier:
   - Clara_Vibio
   name: Vibio Clara
   features:
-  - id: 343a8e18-b76c-4482-b048-32d762bf87c9
+  - id: 8db78df3-92c1-4e59-b599-a399a6493bd5
     output:
       vibrate:
         value:
@@ -34,7 +34,7 @@ configurations:
   - Dodson_Vibio
   name: Vibio Dodson
   features:
-  - id: 343a8e18-b76c-4482-b048-32d762bf87c9
+  - id: 9281fae8-f8e4-4b9f-b452-b01e67c6e3a2
     output:
       vibrate:
         value:
