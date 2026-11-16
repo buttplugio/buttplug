@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 86
+    "minor": 87
   },
   "protocols": {
     "activejoy": {
@@ -16344,6 +16344,7 @@
             "names": [
               "Smart Mini Vibe*",
               "Flamingo",
+              "Flamingo Max",
               "Flamingo T",
               "Smart Bean",
               "Smart Bean3",
@@ -16501,6 +16502,13 @@
             "CBT002"
           ],
           "name": "FunTown Caleo"
+        },
+        {
+          "id": "132740e0-685f-4f1d-878e-f972343bbc93",
+          "identifier": [
+            "Flamingo Max"
+          ],
+          "name": "MagicMotion Flamingo Max"
         }
       ],
       "defaults": {
