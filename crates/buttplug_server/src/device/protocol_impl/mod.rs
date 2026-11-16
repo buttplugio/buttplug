@@ -44,6 +44,7 @@ pub mod htk_bm;
 pub mod itoys;
 pub mod jejoue;
 pub mod joyhub;
+pub mod kaotik;
 pub mod kgoal_boost;
 pub mod kiiroo_powershot;
 pub mod kiiroo_prowand;
@@ -248,6 +249,7 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   add_to_protocol_map(&mut map, itoys::setup::IToysIdentifierFactory::default());
   add_to_protocol_map(&mut map, jejoue::setup::JeJoueIdentifierFactory::default());
   add_to_protocol_map(&mut map, joyhub::setup::JoyHubIdentifierFactory::default());
+  add_to_protocol_map(&mut map, kaotik::setup::KaotikIdentifierFactory::default());
   add_to_protocol_map(
     &mut map,
     kiiroo_powershot::setup::KiirooPowerShotIdentifierFactory::default(),

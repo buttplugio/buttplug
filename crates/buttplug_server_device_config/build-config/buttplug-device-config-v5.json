@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 88
+    "minor": 89
   },
   "protocols": {
     "activejoy": {
@@ -11471,6 +11471,125 @@
         ],
         "id": "53cf03db-266d-46c1-964e-0ef505a64200",
         "name": "JoyHub Device"
+      }
+    },
+    "kaotik": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "The Shockwave",
+              "The Shotty",
+              "The Jetpack",
+              "The Cocoon"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ],
+      "configurations": [
+        {
+          "id": "ef64cc36-6e42-46d2-b154-67408bfee9e5",
+          "identifier": [
+            "The Shockwave"
+          ],
+          "name": "Kaotik Labs The Shockwave"
+        },
+        {
+          "id": "eeab4cad-71b9-41b1-83d9-1bcf78a3b0b5",
+          "identifier": [
+            "The Jetpack"
+          ],
+          "name": "Kaotik Labs The Jetpack"
+        },
+        {
+          "features": [
+            {
+              "id": "98259b2e-ef69-4b5f-a1d3-fd2aab55e08d",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    10
+                  ]
+                }
+              }
+            },
+            {
+              "id": "1bb88395-6833-4571-8df7-78294b6c9275",
+              "index": 1,
+              "output": {
+                "rotate": {
+                  "value": [
+                    0,
+                    10
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "d6ed5904-f9e6-49ed-8d89-1b257cf01bf6",
+          "identifier": [
+            "The Shotty"
+          ],
+          "name": "Kaotik Labs The Shotty"
+        },
+        {
+          "features": [
+            {
+              "id": "51eb4c8f-87cb-48af-ad76-832c795a4121",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    10
+                  ]
+                }
+              }
+            },
+            {
+              "id": "cee7da52-e2a4-4325-92f3-c64910fb8b13",
+              "index": 1,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    10
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "c04b75cb-0aca-4a57-b6b5-d527fa84d66e",
+          "identifier": [
+            "The Cocoon"
+          ],
+          "name": "Kaotik Labs The Cocoon"
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "id": "4f619618-ff9b-4dc7-9156-7b37d2299845",
+            "index": 0,
+            "output": {
+              "oscillate": {
+                "value": [
+                  0,
+                  10
+                ]
+              }
+            }
+          }
+        ],
+        "id": "9b6465c3-73dc-4668-9e0c-80585f6c9fad",
+        "name": "Kaotik Labs Device"
       }
     },
     "kgoal-boost": {
