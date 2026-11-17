@@ -22,10 +22,10 @@
   "type": "module",
   "main": "./dist/buttplug-wasm-blob.mjs",
   "module": "./dist/buttplug-wasm-blob.mjs",
-  "types": "./dist/src/index.d.ts",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/src/index.d.ts",
+      "types": "./dist/index.d.ts",
       "import": "./dist/buttplug-wasm-blob.mjs"
     }
   },
