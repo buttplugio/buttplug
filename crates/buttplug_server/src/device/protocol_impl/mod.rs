@@ -19,6 +19,7 @@ pub mod adrienlastic;
 pub mod amorelie_joy;
 pub mod aneros;
 pub mod ankni;
+pub mod arcwave;
 pub mod bananasome;
 pub mod cachito;
 pub mod cowgirl;
@@ -166,6 +167,10 @@ pub fn get_default_protocol_map() -> HashMap<String, Arc<dyn ProtocolIdentifierF
   );
   add_to_protocol_map(&mut map, aneros::setup::AnerosIdentifierFactory::default());
   add_to_protocol_map(&mut map, ankni::setup::AnkniIdentifierFactory::default());
+  add_to_protocol_map(
+    &mut map,
+    arcwave::setup::ArcwaveIdentifierFactory::default(),
+  );
   add_to_protocol_map(
     &mut map,
     bananasome::setup::BananasomeIdentifierFactory::default(),

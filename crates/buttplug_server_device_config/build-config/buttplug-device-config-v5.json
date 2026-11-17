@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 89
+    "minor": 91
   },
   "protocols": {
     "activejoy": {
@@ -315,6 +315,50 @@
         ],
         "id": "9a26d86b-afd3-4413-ad72-faddf14b7f03",
         "name": "Roselex Device"
+      }
+    },
+    "arcwave": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Orbit"
+            ],
+            "services": {
+              "f000bb03-0451-4000-b000-000000000000": {
+                "tx": "f000c000-0451-4000-b000-000000000000"
+              }
+            }
+          }
+        }
+      ],
+      "configurations": [
+        {
+          "features": [
+            {
+              "id": "1a8194cd-19a0-4a21-b235-58b86e8d7f1e",
+              "index": 0,
+              "output": {
+                "rotate": {
+                  "value": [
+                    -30,
+                    30
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "44410e84-1d2a-42e5-b3d5-85152869360f",
+          "identifier": [
+            "Orbit"
+          ],
+          "name": "Arcwave Orbit"
+        }
+      ],
+      "defaults": {
+        "features": [],
+        "id": "6f7f87ce-1109-4023-9083-57487a40561a",
+        "name": "Arcwave Device"
       }
     },
     "bananasome": {
