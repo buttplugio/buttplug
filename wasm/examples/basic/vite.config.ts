@@ -1,7 +1,6 @@
 import { fileURLToPath, URL } from "url";
 import { defineConfig, Plugin } from "vite";
 import wasm from "vite-plugin-wasm";
-import topLevelAwait from "vite-plugin-top-level-await";
 
 function wasmEnvPlugin(): Plugin {
   const virtualId = "\0virtual:env";
@@ -34,5 +33,5 @@ export default defineConfig({
       allow: [fileURLToPath(new URL("../../..", import.meta.url))],
     },
   },
-  plugins: [wasmEnvPlugin(), wasm(), topLevelAwait()],
+  plugins: [wasmEnvPlugin(), wasm()],
 });

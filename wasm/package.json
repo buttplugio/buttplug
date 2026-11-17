@@ -9,10 +9,5 @@
     "build:blob": "npm run build -w buttplug-wasm-blob",
     "build:connector": "npm run build -w buttplug-wasm",
     "build": "npm run build:wasm && npm run build:blob && npm run build:connector"
-  },
-  "overrides": {
-    "vite-plugin-top-level-await": {
-      "uuid": "^11.1.1"
-    }
   }
 }
