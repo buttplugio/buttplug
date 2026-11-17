@@ -28,9 +28,9 @@ jobs:
         path: target
         key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
     - name: Rust toolchain fetch
-      uses: dtolnay/rust-toolchain@nightly
+      uses: dtolnay/rust-toolchain@6a52aad76a94a5fbc50d567bb5be24419801c1fb # nightly
     - name: WASM Toolchain fetch
-      uses: taiki-e/install-action@v2
+      uses: taiki-e/install-action@ab49d3c64680143e184118bed66a46419fc15519 # v2.90.5
       with:
         tool: wasm-pack@0.15.1
         fallback: none
