@@ -30,5 +30,6 @@ docs
 .worktrees
 node_modules
 package-lock.json
+!wasm/package-lock.json
 **/dist/
 mutants.*
