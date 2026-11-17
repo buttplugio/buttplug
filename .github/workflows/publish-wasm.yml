@@ -30,10 +30,10 @@ jobs:
     - name: Rust toolchain fetch
       uses: dtolnay/rust-toolchain@nightly
     - name: WASM Toolchain fetch
-      uses: jetli/wasm-pack-action@v0.4.0
+      uses: taiki-e/install-action@v2
       with:
-        # Pinned: 'latest' does an unauthenticated API lookup that falls back to v0.9.1 when rate limited.
-        version: 'v0.15.1'
+        tool: wasm-pack@0.15.1
+        fallback: none
     - name: Set up Node.js
       uses: actions/setup-node@v7
       with:

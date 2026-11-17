@@ -81,14 +81,16 @@ jobs:
       with:
         components: rustfmt, clippy
     - name: WASM Toolchain fetch
-      uses: jetli/wasm-pack-action@v0.4.0
+      uses: taiki-e/install-action@v2
       with:
-        # Pinned: 'latest' does an unauthenticated API lookup that falls back to v0.9.1 when rate limited.
-        version: 'v0.15.1'
+        tool: wasm-pack@0.15.1
+        fallback: none
     - name: Set up Node.js
       uses: actions/setup-node@v7
       with:
         node-version: '24'
+        # Matches publish-wasm.yml so its npm setup is exercised on every CI run.
+        registry-url: 'https://registry.npmjs.org'
         cache: npm
         cache-dependency-path: wasm/package-lock.json
     - name: Build WASM crate
