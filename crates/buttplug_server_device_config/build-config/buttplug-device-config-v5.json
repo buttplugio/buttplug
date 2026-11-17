@@ -1,7 +1,7 @@
 {
   "version": {
     "major": 5,
-    "minor": 86
+    "minor": 91
   },
   "protocols": {
     "activejoy": {
@@ -315,6 +315,50 @@
         ],
         "id": "9a26d86b-afd3-4413-ad72-faddf14b7f03",
         "name": "Roselex Device"
+      }
+    },
+    "arcwave": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "Orbit"
+            ],
+            "services": {
+              "f000bb03-0451-4000-b000-000000000000": {
+                "tx": "f000c000-0451-4000-b000-000000000000"
+              }
+            }
+          }
+        }
+      ],
+      "configurations": [
+        {
+          "features": [
+            {
+              "id": "1a8194cd-19a0-4a21-b235-58b86e8d7f1e",
+              "index": 0,
+              "output": {
+                "rotate": {
+                  "value": [
+                    -30,
+                    30
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "44410e84-1d2a-42e5-b3d5-85152869360f",
+          "identifier": [
+            "Orbit"
+          ],
+          "name": "Arcwave Orbit"
+        }
+      ],
+      "defaults": {
+        "features": [],
+        "id": "6f7f87ce-1109-4023-9083-57487a40561a",
+        "name": "Arcwave Device"
       }
     },
     "bananasome": {
@@ -11473,6 +11517,125 @@
         "name": "JoyHub Device"
       }
     },
+    "kaotik": {
+      "communication": [
+        {
+          "btle": {
+            "names": [
+              "The Shockwave",
+              "The Shotty",
+              "The Jetpack",
+              "The Cocoon"
+            ],
+            "services": {
+              "0000ffe0-0000-1000-8000-00805f9b34fb": {
+                "tx": "0000ffe1-0000-1000-8000-00805f9b34fb"
+              }
+            }
+          }
+        }
+      ],
+      "configurations": [
+        {
+          "id": "ef64cc36-6e42-46d2-b154-67408bfee9e5",
+          "identifier": [
+            "The Shockwave"
+          ],
+          "name": "Kaotik Labs The Shockwave"
+        },
+        {
+          "id": "eeab4cad-71b9-41b1-83d9-1bcf78a3b0b5",
+          "identifier": [
+            "The Jetpack"
+          ],
+          "name": "Kaotik Labs The Jetpack"
+        },
+        {
+          "features": [
+            {
+              "id": "98259b2e-ef69-4b5f-a1d3-fd2aab55e08d",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    10
+                  ]
+                }
+              }
+            },
+            {
+              "id": "1bb88395-6833-4571-8df7-78294b6c9275",
+              "index": 1,
+              "output": {
+                "rotate": {
+                  "value": [
+                    0,
+                    10
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "d6ed5904-f9e6-49ed-8d89-1b257cf01bf6",
+          "identifier": [
+            "The Shotty"
+          ],
+          "name": "Kaotik Labs The Shotty"
+        },
+        {
+          "features": [
+            {
+              "id": "51eb4c8f-87cb-48af-ad76-832c795a4121",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    10
+                  ]
+                }
+              }
+            },
+            {
+              "id": "cee7da52-e2a4-4325-92f3-c64910fb8b13",
+              "index": 1,
+              "output": {
+                "oscillate": {
+                  "value": [
+                    0,
+                    10
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "c04b75cb-0aca-4a57-b6b5-d527fa84d66e",
+          "identifier": [
+            "The Cocoon"
+          ],
+          "name": "Kaotik Labs The Cocoon"
+        }
+      ],
+      "defaults": {
+        "features": [
+          {
+            "id": "4f619618-ff9b-4dc7-9156-7b37d2299845",
+            "index": 0,
+            "output": {
+              "oscillate": {
+                "value": [
+                  0,
+                  10
+                ]
+              }
+            }
+          }
+        ],
+        "id": "9b6465c3-73dc-4668-9e0c-80585f6c9fad",
+        "name": "Kaotik Labs Device"
+      }
+    },
     "kgoal-boost": {
       "communication": [
         {
@@ -16344,6 +16507,7 @@
             "names": [
               "Smart Mini Vibe*",
               "Flamingo",
+              "Flamingo Max",
               "Flamingo T",
               "Smart Bean",
               "Smart Bean3",
@@ -16501,6 +16665,13 @@
             "CBT002"
           ],
           "name": "FunTown Caleo"
+        },
+        {
+          "id": "132740e0-685f-4f1d-878e-f972343bbc93",
+          "identifier": [
+            "Flamingo Max"
+          ],
+          "name": "MagicMotion Flamingo Max"
         }
       ],
       "defaults": {
@@ -26149,6 +26320,7 @@
           "btle": {
             "names": [
               "Chorus",
+              "Chorus Pro",
               "skeena",
               "Sync 2",
               "Sync O",
@@ -26164,6 +26336,54 @@
         }
       ],
       "configurations": [
+        {
+          "features": [
+            {
+              "description": "Internal Vibrator",
+              "id": "6e51328e-0384-4e18-b1c9-004512670487",
+              "index": 0,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    30
+                  ]
+                }
+              }
+            },
+            {
+              "description": "External Tip Vibrator",
+              "id": "68285a0d-1d85-4e45-a4f8-1ad969291d0a",
+              "index": 1,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    30
+                  ]
+                }
+              }
+            },
+            {
+              "description": "External Base Vibrator",
+              "id": "81b86559-0495-4931-8dae-a10100678f76",
+              "index": 2,
+              "output": {
+                "vibrate": {
+                  "value": [
+                    0,
+                    30
+                  ]
+                }
+              }
+            }
+          ],
+          "id": "0efb42ee-2c70-4fb6-8636-4b4f452f7b93",
+          "identifier": [
+            "Chorus Pro"
+          ],
+          "name": "WeVibe Chorus Pro"
+        },
         {
           "features": [
             {

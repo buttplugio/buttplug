@@ -1,0 +1,25 @@
+---
+defaults:
+  name: Arcwave Device
+  features: []
+  id: 6f7f87ce-1109-4023-9083-57487a40561a
+configurations:
+- identifier:
+  - Orbit
+  name: Arcwave Orbit
+  features:
+  - id: 1a8194cd-19a0-4a21-b235-58b86e8d7f1e
+    output:
+      rotate:
+        value:
+        - -30
+        - 30
+    index: 0
+  id: 44410e84-1d2a-42e5-b3d5-85152869360f
+communication:
+- btle:
+    names:
+    - Orbit
+    services:
+      f000bb03-0451-4000-b000-000000000000:
+        tx: f000c000-0451-4000-b000-000000000000

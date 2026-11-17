@@ -98,11 +98,16 @@ configurations:
   - CBT002
   name: FunTown Caleo
   id: b6dc5c46-0919-4a45-900e-f83afae8b942
+- identifier:
+    - Flamingo Max
+  name: MagicMotion Flamingo Max
+  id: 132740e0-685f-4f1d-878e-f972343bbc93
 communication:
 - btle:
     names:
     - Smart Mini Vibe*
     - Flamingo
+    - Flamingo Max
     - Flamingo T
     - Smart Bean
     - Smart Bean3

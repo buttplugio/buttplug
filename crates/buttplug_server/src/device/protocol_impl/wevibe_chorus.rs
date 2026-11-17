@@ -55,30 +55,26 @@ impl ProtocolInitializer for WeVibeChorusInitializer {
 
 pub struct WeVibeChorus {
   num_vibrators: u8,
-  speeds: [AtomicU8; 2],
+  speeds: [AtomicU8; 3],
 }
 
 impl WeVibeChorus {
   fn new(num_vibrators: u8) -> Self {
     Self {
       num_vibrators,
-      speeds: [AtomicU8::default(), AtomicU8::default()],
+      speeds: [
+        AtomicU8::default(),
+        AtomicU8::default(),
+        AtomicU8::default(),
+      ],
     }
   }
-}
 
-impl ProtocolHandler for WeVibeChorus {
-  fn handle_output_vibrate_cmd(
-    &self,
-    feature_index: u32,
-    _feature_id: uuid::Uuid,
-    speed: u32,
-  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
-    self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
+  fn two_motor_packet(&self) -> Vec<u8> {
     let max_vibrators = if self.num_vibrators > 1 { 1 } else { 0 };
     let r_speed_int = self.speeds[0].load(Ordering::Relaxed);
     let r_speed_ext = self.speeds[max_vibrators].load(Ordering::Relaxed);
-    let data = if r_speed_int == 0 && r_speed_ext == 0 {
+    if r_speed_int == 0 && r_speed_ext == 0 {
       vec![0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
     } else {
       // Note the motor order is flipped for the Chorus
@@ -94,6 +90,54 @@ impl ProtocolHandler for WeVibeChorus {
         0x00,
         0x00,
       ]
+    }
+  }
+
+  // The Chorus Pro uses the We-Connect app's 0xe0 command: three speeds (external tip,
+  // internal, external base), then one pattern byte per motor (0x03 steady, 0xaa off). Unlike
+  // the 0x0f command, this doesn't overwrite the toy's stored stand-alone settings, which 0x0f
+  // can leave with motors disabled.
+  fn three_motor_packet(&self) -> Vec<u8> {
+    // Features keep the two-motor Chorus order (internal, external), with the external base
+    // added as feature 2, so feature 0 goes in the middle slot.
+    let speeds: Vec<u8> = [1, 0, 2]
+      .iter()
+      .map(|&i| self.speeds[i].load(Ordering::Relaxed))
+      .collect();
+    let pattern = |speed: u8| if speed == 0 { 0xaa } else { 0x03 };
+    vec![
+      0xe0,
+      speeds[0],
+      speeds[1],
+      speeds[2],
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+      pattern(speeds[0]),
+      pattern(speeds[1]),
+      pattern(speeds[2]),
+      0x00,
+      0x00,
+      0x00,
+      0x00,
+    ]
+  }
+}
+
+impl ProtocolHandler for WeVibeChorus {
+  fn handle_output_vibrate_cmd(
+    &self,
+    feature_index: u32,
+    _feature_id: uuid::Uuid,
+    speed: u32,
+  ) -> Result<Vec<HardwareCommand>, ButtplugDeviceError> {
+    self.speeds[feature_index as usize].store(speed as u8, Ordering::Relaxed);
+    let data = if self.num_vibrators > 2 {
+      self.three_motor_packet()
+    } else {
+      self.two_motor_packet()
     };
     Ok(vec![
       HardwareWriteCmd::new(&[WEVIBE_CHORUS_PROTOCOL_UUID], Endpoint::Tx, data, true).into(),
