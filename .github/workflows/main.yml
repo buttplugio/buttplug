@@ -83,7 +83,8 @@ jobs:
     - name: WASM Toolchain fetch
       uses: jetli/wasm-pack-action@v0.4.0
       with:
-        version: 'latest'
+        # Pinned: 'latest' does an unauthenticated API lookup that falls back to v0.9.1 when rate limited.
+        version: 'v0.15.1'
     - name: Set up Node.js
       uses: actions/setup-node@v7
       with:
