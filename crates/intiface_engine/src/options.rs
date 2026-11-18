@@ -45,6 +45,9 @@ pub struct EngineOptions {
   use_simulated_devices: bool,
   #[getset(get_copy = "pub")]
   device_websocket_server_port: Option<u16>,
+  /// Bind the device websocket server to 127.0.0.1 only (default: all interfaces).
+  #[getset(get_copy = "pub")]
+  device_websocket_server_loopback_only: bool,
   #[getset(get_copy = "pub")]
   crash_main_thread: bool,
   #[getset(get_copy = "pub")]
@@ -85,6 +88,7 @@ pub struct EngineOptionsExternal {
   pub use_device_websocket_server: bool,
   pub use_simulated_devices: bool,
   pub device_websocket_server_port: Option<u16>,
+  pub device_websocket_server_loopback_only: bool,
   pub crash_main_thread: bool,
   pub crash_task_thread: bool,
   pub broadcast_server_mdns: bool,
@@ -117,6 +121,7 @@ impl From<EngineOptionsExternal> for EngineOptions {
       use_device_websocket_server: other.use_device_websocket_server,
       use_simulated_devices: other.use_simulated_devices,
       device_websocket_server_port: other.device_websocket_server_port,
+      device_websocket_server_loopback_only: other.device_websocket_server_loopback_only,
       crash_main_thread: other.crash_main_thread,
       crash_task_thread: other.crash_task_thread,
       broadcast_server_mdns: other.broadcast_server_mdns,
@@ -236,6 +241,13 @@ impl EngineOptionsBuilder {
 
   pub fn device_websocket_server_port(&mut self, port: u16) -> &mut Self {
     self.options.device_websocket_server_port = Some(port);
+    self
+  }
+
+  /// Bind the device websocket server to loopback only, so only processes on this
+  /// machine can offer devices to the engine.
+  pub fn device_websocket_server_loopback_only(&mut self, value: bool) -> &mut Self {
+    self.options.device_websocket_server_loopback_only = value;
     self
   }
 

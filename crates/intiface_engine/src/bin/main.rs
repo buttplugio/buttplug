@@ -137,6 +137,11 @@ pub struct IntifaceCLIArguments {
   #[getset(get_copy = "pub")]
   device_websocket_server_port: Option<u16>,
 
+  /// bind the device websocket server to 127.0.0.1 only (default: all interfaces)
+  #[argh(switch)]
+  #[getset(get_copy = "pub")]
+  device_websocket_server_loopback_only: bool,
+
   /// if set, broadcast server port/service info via mdns
   #[argh(switch)]
   #[getset(get_copy = "pub")]
@@ -301,6 +306,9 @@ impl TryFrom<IntifaceCLIArguments> for EngineOptions {
     }
     if let Some(value) = args.device_websocket_server_port() {
       builder.device_websocket_server_port(value);
+    }
+    if args.device_websocket_server_loopback_only() {
+      builder.device_websocket_server_loopback_only(true);
     }
     if let Some(value) = args.rest_api_port() {
       builder.rest_api_port(*value);
