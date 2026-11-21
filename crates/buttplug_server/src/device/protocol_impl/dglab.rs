@@ -200,9 +200,11 @@ impl ProtocolHandler for DGLab {
             if let HardwareEvent::Notification(_, endpoint, data) = info
               && endpoint == Endpoint::Rx
             {
-              if data.len() < 9 {
-                // Not even sure how this would happen, error and continue on.
-                error!("DGLab data not expected length!");
+              // Only 0xD0 reports carry pressure (int16 LE at bytes 8-9). The device also
+              // notifies on this characteristic for other packets (status, acks to the
+              // waveform writes), whose bytes 8-9 are not a pressure.
+              if data.len() < 10 || data[0] != 0xD0 {
+                debug!("DGLab non-pressure notification: {:?}", data);
                 continue;
               }
               // Extract our two pressure values.
